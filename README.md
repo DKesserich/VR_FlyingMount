@@ -7,7 +7,7 @@ There is also a simple VR Pawn blueprint that demonstrates handling the interact
 
 For demo purposes the visualization of the mount is a vacuum cleaner, but this system is equally usable for something like a flying carpet, or perhaps another floor cleaning implement.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ec53YkPCquo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[Video Demo Here](https://youtu.be/ec53YkPCquo)
 
 Controls are as follows:
 - Left controller thumbstick handles throttle.
