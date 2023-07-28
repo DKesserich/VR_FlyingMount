@@ -49,6 +49,10 @@
 				"Android",
 				"HoloLens"
 			]
+		},
+		{
+			"Name": "ConsoleVariables",
+			"Enabled": true
 		}
 	]
 }

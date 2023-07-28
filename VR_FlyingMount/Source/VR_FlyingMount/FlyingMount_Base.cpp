@@ -35,6 +35,7 @@ void AFlyingMount_Base::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFlyingMount_Base, MaxFlySpeed);
 	DOREPLIFETIME(AFlyingMount_Base, MaxTurnSpeed);
 	DOREPLIFETIME(AFlyingMount_Base, CanRoll);
+	DOREPLIFETIME(AFlyingMount_Base, HoldingHand);
 }
 
 // Called when the game starts or when spawned
@@ -47,40 +48,45 @@ void AFlyingMount_Base::BeginPlay()
 // Called every frame
 void AFlyingMount_Base::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	//Make a new Transform and set it to the Mount's Current Transform.
-	FTransform NewTargetTransform = GetActorTransform();
-
-	//If we have an owner and the owner is a locally controlled Pawn
+	Super::Tick(DeltaTime);	
+	
 	if (GetOwner() && Cast<APawn>(GetOwner())->IsLocallyControlled())
-	{	
-		//If the handle is being held.
-		if (HoldingHand)
-		{
-			//Ease the throttle value so we don't instantly transition from stop to start or vice versa
-			EasedThrottle = FMath::Lerp(EasedThrottle, GetThrottleValue(), DeltaTime);
+	{
+		UpdateMovement(TargetTransform, EasedThrottle, DeltaTime, GetThrottleValue());
+		
+		//Send our new target transform to the server.
+		Server_UpdateTargetTransform(TargetTransform);
+	}
 
-			//Get the location we want to be based on the forward vector of the Handle, our maximum flying speed, and the throttle
-			NewTargetTransform.SetLocation(GetActorLocation() + (Handle->GetForwardVector() * (MaxFlySpeed * EasedThrottle)));
+}
 
-			//Convert the location of the hand holding the handle to our space
-			FVector handPosition = GetActorTransform().InverseTransformPosition(HoldingHand->GetComponentLocation());
+void AFlyingMount_Base::UpdateMovement(FTransform& UpdatedTransform, float& ThrottleEased, float DeltaTime, float Throttle) const
+{	
+	//If the handle is being held.
+	if (HoldingHand)
+	{
+		//Ease the throttle value so we don't instantly transition from stop to start or vice versa
+		ThrottleEased = FMath::Lerp(ThrottleEased, Throttle, DeltaTime);
 
-			//Rotate the handle to point at the holding hand
-			FRotator handleRotation = UKismetMathLibrary::FindLookAtRotation(Handle->GetRelativeLocation(), handPosition);
-			handleRotation.Yaw = FMath::Clamp(handleRotation.Yaw, -20, 20);
-			handleRotation.Pitch = FMath::Clamp(handleRotation.Pitch, -20, 20);
+		//Get the location we want to be based on the forward vector of the Handle, our maximum flying speed, and the throttle
+		UpdatedTransform.SetLocation(GetActorLocation() + (Handle->GetForwardVector() * (MaxFlySpeed * ThrottleEased)));
 
-			Handle->SetRelativeRotation(handleRotation);			
-		}
+		//Convert the location of the hand holding the handle to our space
+		FVector handPosition = GetActorTransform().InverseTransformPosition(HoldingHand->GetComponentLocation());
+
+		//Rotate the handle to point at the holding hand
+		FRotator handleRotation = UKismetMathLibrary::FindLookAtRotation(Handle->GetRelativeLocation(), handPosition);
+		handleRotation.Yaw = FMath::Clamp(handleRotation.Yaw, -20, 20);
+		handleRotation.Pitch = FMath::Clamp(handleRotation.Pitch, -20, 20);
+
+		Handle->SetRelativeRotation(handleRotation);
+
 		//Combine the current rotation of the actor with the rotation of the handle. Use Quaternions so we can do loop-de-loops
-		NewTargetTransform.SetRotation((GetActorTransform().GetRotation() * Handle->GetRelativeTransform().GetRotation()));	
-
+		UpdatedTransform.SetRotation((GetActorTransform().GetRotation() * Handle->GetRelativeTransform().GetRotation()));
 	}
 	else
 	{
-		//If we don't have an owner or the owner isn't a locally controlled pawn, ease the handle back to starting position.
+		//If we don't have a holding hand, ease the handle back to starting position.
 		Handle->SetRelativeRotation(FQuat::Slerp(Handle->GetRelativeRotation().Quaternion(), FRotator::ZeroRotator.Quaternion(), DeltaTime));
 
 		//Zero out the pitch and roll.
@@ -90,18 +96,22 @@ void AFlyingMount_Base::Tick(float DeltaTime)
 
 		UnRolled.Pitch = 0;
 
-		NewTargetTransform.SetRotation(UnRolled.Quaternion());
+		UpdatedTransform.SetRotation(UnRolled.Quaternion());
+
+		//Ease back to stop
+		ThrottleEased = FMath::Lerp(ThrottleEased, 0, DeltaTime);
+
+		UpdatedTransform.SetLocation(GetActorLocation() + (Handle->GetForwardVector() * (MaxFlySpeed * ThrottleEased)));
+
+		
 	}
-
-	//Send our new target transform to the server.
-	Server_UpdateTargetTransform(NewTargetTransform);
-
+	
 }
 
-void AFlyingMount_Base::Server_UpdateTargetTransform_Implementation(FTransform NewTargetTransform)
+void AFlyingMount_Base::Server_UpdateTargetTransform_Implementation(FTransform UpdatedTransform)
 {
 	//Set the replicated TargetTransform variable to the received NewTargetTransform. Call OnRep so the Server does the same math as any clients.
-	TargetTransform = NewTargetTransform;
+	TargetTransform = UpdatedTransform;
 
 	OnRep_TargetTransform();
 }

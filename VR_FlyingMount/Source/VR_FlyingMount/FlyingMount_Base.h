@@ -35,7 +35,7 @@ public:
 	float MaxTurnSpeed;
 
 	//The Hand that is currently holding the handle.
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	USceneComponent* HoldingHand;
 
 	//Setter function for CanRoll
@@ -49,16 +49,20 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_TargetTransform)
 	FTransform TargetTransform;
 
+	FTransform NewTargetTransform;
+
 	//Whether we can roll or not.
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintSetter = SetCanRoll)
 	bool CanRoll = true;
 
 	UFUNCTION(Server, Unreliable)
-	void Server_UpdateTargetTransform(FTransform NewTargetTransform);
-	void Server_UpdateTargetTransform_Implementation(FTransform NewTargetTransform);
+	void Server_UpdateTargetTransform(FTransform UpdatedTransform);
+	void Server_UpdateTargetTransform_Implementation(FTransform UpdatedTransform);
 
 	UFUNCTION()
 	void OnRep_TargetTransform();
+
+	void UpdateMovement(FTransform& UpdatedTransform, float& ThrottleEased, float DeltaTime, float Throttle) const;
 
 public:	
 	// Called every frame
