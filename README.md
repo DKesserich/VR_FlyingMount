@@ -18,5 +18,3 @@ Controls are as follows:
 Current TODOs:
 - Haptics to signal when in the grab radius of the handle and for collision feedback.
 - Rolling based on lean.
-- Do ownership assignment properly when running while networked.
-
