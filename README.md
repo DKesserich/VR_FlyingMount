@@ -11,7 +11,7 @@ For demo purposes the visualization of the mount is a vacuum cleaner, but this s
 
 Controls are as follows:
 - Left controller thumbstick handles throttle.
-- Grip (Valve Index Controller) or Grip Button (Oculus Touch, Windows MR Controller) to grab the handle of the mount. Steer by moving whichever hand is holding the handle to point where you want to go.
+- Grip (Valve Index Controller) or Grip Button (Oculus Touch, Windows MR Controller) to grab the handle of the mount. Steer by moving whichever hand is holding the handle to point where you want to go. Roll by leaning left or right
 - Hold either trigger to correct roll (Roll can also be disabled entirely in the defaults of the FlyingMount BP, if that's you're preference)
 - Releasing the handle will return the mount to level (no pitch, no roll).
 
