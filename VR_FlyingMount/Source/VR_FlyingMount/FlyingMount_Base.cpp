@@ -6,6 +6,9 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AFlyingMount_Base::AFlyingMount_Base()
@@ -74,10 +77,18 @@ void AFlyingMount_Base::UpdateMovement(FTransform& UpdatedTransform, float& Thro
 		//Convert the location of the hand holding the handle to our space
 		FVector handPosition = GetActorTransform().InverseTransformPosition(HoldingHand->GetComponentLocation());
 
-		//Rotate the handle to point at the holding hand
+		//Convert thee camera position to our space and flatten it on the X axis.
+		FVector cameraPosition = GetActorTransform().InverseTransformPosition(UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation());
+
+		cameraPosition *= FVector(0.0f, 1.0f, 1.0f);
+
+		//DrawDebugSphere(GetWorld(), GetActorTransform().TransformPosition(cameraPosition), 25.0f, 8, FColor::Red, false, 1.0f);
+
+		//Rotate the handle to point at the holding hand. Roll the handle to point at the player's head.
 		FRotator handleRotation = UKismetMathLibrary::FindLookAtRotation(Handle->GetRelativeLocation(), handPosition);
 		handleRotation.Yaw = FMath::Clamp(handleRotation.Yaw, -20, 20);
 		handleRotation.Pitch = FMath::Clamp(handleRotation.Pitch, -20, 20);
+		handleRotation.Roll = FMath::Clamp(GetLookAtQuaternion(Handle->GetRelativeLocation(), cameraPosition).Rotator().Roll, -20, 20);
 
 		Handle->SetRelativeRotation(handleRotation);
 
@@ -142,4 +153,16 @@ void AFlyingMount_Base::OnRep_TargetTransform()
 	Root->SetPhysicsAngularVelocityInRadians(AngularVelocity + RollVelocity);
 	
 }
+
+FQuat AFlyingMount_Base::GetLookAtQuaternion(const FVector& Start, const FVector& Target) const
+{
+	return MyLookAt(Target - Start, Handle->GetRelativeTransform().GetRotation().GetRightVector());
+}
+
+
+FQuat AFlyingMount_Base::MyLookAt(const FVector& lookAt, const FVector& upDirection) const
+{
+	return FRotationMatrix::MakeFromZY(lookAt, upDirection).ToQuat();
+}
+
 

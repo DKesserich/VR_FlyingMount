@@ -76,4 +76,9 @@ private:
 
 	float EasedThrottle = 0;
 
+	//Custom LookAts for getting roll based on camera location
+	FQuat GetLookAtQuaternion(const FVector& Start, const FVector& Target) const;
+
+	FQuat MyLookAt(const FVector& lookAt, const FVector& upDirection) const;
+
 };
