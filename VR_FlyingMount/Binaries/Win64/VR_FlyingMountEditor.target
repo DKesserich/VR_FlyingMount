@@ -34,6 +34,18 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/FlyingMount/Binaries/Win64/UnrealEditor-FlyingMount.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/FlyingMount/Binaries/Win64/UnrealEditor-FlyingMount.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/FlyingMount/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/AgentInterface.dll",
 			"Type": "RequiredResource"
 		},
@@ -3495,6 +3507,10 @@
 		}
 	],
 	"RuntimeDependencies": [
+		{
+			"Path": "$(ProjectDir)/Plugins/FlyingMount/FlyingMount.uplugin",
+			"Type": "UFS"
+		},
 		{
 			"Path": "$(ProjectDir)/VR_FlyingMount.uproject",
 			"Type": "UFS"
