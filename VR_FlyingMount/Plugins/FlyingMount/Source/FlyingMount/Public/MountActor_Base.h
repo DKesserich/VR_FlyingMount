@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/SphereComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/SceneComponent.h"
 #include "MountActor_Base.generated.h"
+
+class USphereComponent;
+class UStaticMeshComponent;
+class UCapsuleComponent;
+class USceneComponent;
 
 UCLASS(Config=FlyingMount, DefaultConfig)
 class FLYINGMOUNT_API AMountActor_Base : public AActor
@@ -25,6 +27,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* Handle;
+
+	UPROPERTY(EditDefaultsOnly)
+	UCapsuleComponent* HandleCollision;
 
 	//The maximum speed that we are allowed to fly. Set in DefaultFlyingMountConfig.ini
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Config)

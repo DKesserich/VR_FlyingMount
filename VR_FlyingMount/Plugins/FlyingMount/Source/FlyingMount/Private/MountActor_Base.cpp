@@ -5,6 +5,12 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
+
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
+#include "Components/CapsuleComponent.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,12 +24,22 @@ AMountActor_Base::AMountActor_Base()
 
 	Root = CreateDefaultSubobject<USphereComponent>(TEXT("Root"));
 	Root->SetEnableGravity(false);
+	Root->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Root->SetSimulatePhysics(true);
 
 	RootComponent = Root;
 
 	Handle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Handle"));
+	Handle->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Handle->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 
 	Handle->SetupAttachment(Root);
+
+	HandleCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Interaction_Handle"));
+	HandleCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HandleCollision->SetCollisionProfileName(TEXT("VRInteractor"));
+
+	HandleCollision->SetupAttachment(Handle, TEXT("Handle_Socket"));
 
 }
 
