@@ -158,9 +158,9 @@ void AMountActor_Base::OnRep_TargetTransform()
 
 	//Derive angular velocities for Pitch, Yaw, and Roll from the cross products of the forward and up vectors.
 
-	FVector AngularVelocity = GetActorForwardVector().Cross(TargetTransform.GetRotation().GetForwardVector()) * MaxTurnSpeed * GetWorld()->DeltaTimeSeconds;
+	FVector AngularVelocity = GetActorForwardVector().Cross(TargetTransform.GetRotation().GetForwardVector()) * MaxTurnSpeed; 
 
-	FVector RollVelocity = GetActorUpVector().Cross(TargetTransform.GetRotation().GetUpVector()) * MaxTurnSpeed * GetWorld()->DeltaTimeSeconds;
+	FVector RollVelocity = GetActorUpVector().Cross(TargetTransform.GetRotation().GetUpVector()) * MaxTurnSpeed;
 
 	Root->SetPhysicsAngularVelocityInRadians(AngularVelocity + RollVelocity);
 	
